@@ -1,0 +1,15 @@
+# system
+.DS_Store
+.idea
+
+# python
+*.py[cod]
+*.so
+*.out
+__pycache__
+
+# exceed
+train.json
+
+# privacy
+*.log
