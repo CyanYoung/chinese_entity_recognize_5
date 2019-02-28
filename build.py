@@ -30,7 +30,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 detail = False if torch.cuda.is_available() else True
 
 embed_len = 200
-seq_len = 30
+seq_len = 50
 
 head, stack = 4, 2
 
@@ -127,7 +127,7 @@ def fit(name, max_epoch, embed_mat, class_num, path_feats, detail):
     train_loader, dev_loader = get_loader(tensors[:bound]), get_loader(tensors[bound:])
     embed_mat = torch.Tensor(embed_mat)
     arch = map_item(name, archs)
-    model = arch(embed_mat, class_num).to(device)
+    model = arch(embed_mat, pos_mat, class_num, head, stack).to(device)
     loss_func = CrossEntropyLoss(ignore_index=0, reduction='sum')
     learn_rate, min_rate = 1e-3, 1e-5
     min_dev_loss = float('inf')
