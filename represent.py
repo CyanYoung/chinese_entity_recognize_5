@@ -62,7 +62,7 @@ def pad(seq, seq_len):
     if len(seq) < seq_len:
         return seq + [pad_ind] * (seq_len - len(seq))
     else:
-        return seq[-seq_len:]
+        return seq[:seq_len]
 
 
 def label2ind(sents, path_label_ind):
