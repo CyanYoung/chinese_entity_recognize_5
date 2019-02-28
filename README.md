@@ -12,11 +12,13 @@ merge_sent() 和 label_sent() 分别对 univ、extra 标注，汇总、打乱
 
 #### 3.represent
 
-label2ind() 增设标签 N，add_buf() 再对 cnn_sent 头部、尾部进行填充
+label2ind() 增设标签 N，sent2ind() 将每句转换为词索引并填充为相同长度
 
 #### 4.build
 
-train 80% / dev 20% 划分，通过 dnn 的 trm 构建实体识别模型
+通过 dnn 的 trm 构建实体识别模型，对编码器词特征 x 多头线性映射
+
+得到 q、k、v，使用点积注意力得到语境向量 c、再线性映射进行降维后分类
 
 #### 5.recognize
 
