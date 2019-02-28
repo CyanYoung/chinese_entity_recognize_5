@@ -11,7 +11,6 @@ from util import sent2label
 embed_len = 200
 min_freq = 1
 max_vocab = 5000
-win_len = 7
 seq_len = 50
 
 pad_ind, oov_ind = 0, 1
@@ -61,7 +60,7 @@ def sent2ind(words, word_inds, seq_len, keep_oov):
 
 def pad(seq, seq_len):
     if len(seq) < seq_len:
-        return [pad_ind] * (seq_len - len(seq)) + seq
+        return seq + [pad_ind] * (seq_len - len(seq))
     else:
         return seq[-seq_len:]
 
@@ -79,23 +78,13 @@ def label2ind(sents, path_label_ind):
         pk.dump(label_inds, f)
 
 
-def add_buf(seqs):
-    buf = [0] * int((win_len - 1) / 2)
-    buf_seqs = list()
-    for seq in seqs:
-        buf_seqs.append(buf + seq + buf)
-    return buf_seqs
-
-
-def align_sent(text_words, path_sent, extra):
+def align_sent(text_words, path_sent):
     with open(path_word_ind, 'rb') as f:
         word_inds = pk.load(f)
     pad_seqs = list()
     for words in text_words:
         pad_seq = sent2ind(words, word_inds, seq_len, keep_oov=True)
         pad_seqs.append(pad_seq)
-    if extra:
-        pad_seqs = add_buf(pad_seqs)
     pad_seqs = np.array(pad_seqs)
     with open(path_sent, 'wb') as f:
         pk.dump(pad_seqs, f)
@@ -115,7 +104,7 @@ def align_label(sents, path_label):
         pk.dump(ind_mat, f)
 
 
-def vectorize(path_data, path_cnn_sent, path_rnn_sent, path_label, mode):
+def vectorize(path_data, path_sent, path_label, mode):
     with open(path_data, 'r') as f:
         sents = json.load(f)
     texts = sents.keys()
@@ -123,19 +112,16 @@ def vectorize(path_data, path_cnn_sent, path_rnn_sent, path_label, mode):
     if mode == 'train':
         embed(text_words, path_word_ind, path_word_vec, path_embed)
         label2ind(sents, path_label_ind)
-    align_sent(text_words, path_cnn_sent, extra=True)
-    align_sent(text_words, path_rnn_sent, extra=False)
+    align_sent(text_words, path_sent)
     align_label(sents, path_label)
 
 
 if __name__ == '__main__':
     path_data = 'data/train.json'
-    path_cnn_sent = 'feat/cnn_sent_train.pkl'
-    path_rnn_sent = 'feat/rnn_sent_train.pkl'
+    path_sent = 'feat/sent_train.pkl'
     path_label = 'feat/label_train.pkl'
-    vectorize(path_data, path_cnn_sent, path_rnn_sent, path_label, 'train')
+    vectorize(path_data, path_sent, path_label, 'train')
     path_data = 'data/dev.json'
-    path_cnn_sent = 'feat/cnn_sent_dev.pkl'
-    path_rnn_sent = 'feat/rnn_sent_dev.pkl'
+    path_sent = 'feat/sent_dev.pkl'
     path_label = 'feat/label_dev.pkl'
-    vectorize(path_data, path_cnn_sent, path_rnn_sent, path_label, 'dev')
+    vectorize(path_data, path_sent, path_label, 'dev')
