@@ -14,7 +14,6 @@ class Trm(nn.Module):
 
     def forward(self, x):
         x = self.encode(x)
-        x = x[:, 0, :]
         return self.dl(x)
 
 
