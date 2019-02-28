@@ -2,19 +2,37 @@ import time
 
 import pickle as pk
 
+import math
+
 import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader
 
-from nn_arch import Cnn, Rnn
+from nn_arch import Trm
 
 from util import map_item
+
+
+def get_pos(seq_len, embed_len):
+    pos = torch.zeros(seq_len, embed_len)
+    for i in range(seq_len):
+        for j in range(embed_len):
+            if j % 2:
+                pos[i, j] = math.sin(i / math.pow(1e4, j / embed_len))
+            else:
+                pos[i, j] = math.cos(i / math.pow(1e4, (j - 1) / embed_len))
+    return torch.unsqueeze(pos, dim=0)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 detail = False if torch.cuda.is_available() else True
+
+embed_len = 200
+seq_len = 30
+
+head, stack = 4, 2
 
 batch_size = 32
 
@@ -27,11 +45,11 @@ with open(path_label_ind, 'rb') as f:
 
 class_num = len(label_inds)
 
-archs = {'cnn': Cnn,
-         'rnn': Rnn}
+pos_mat = get_pos(seq_len, embed_len).to(device)
 
-paths = {'cnn': 'model/cnn.pkl',
-         'rnn': 'model/rnn.pkl'}
+archs = {'trm': Trm}
+
+paths = {'trm': 'model/dnn_trm.pkl'}
 
 
 def load_feat(path_feats):
@@ -147,11 +165,8 @@ def fit(name, max_epoch, embed_mat, class_num, path_feats, detail):
 
 if __name__ == '__main__':
     path_feats = dict()
-    path_feats['sent_train'] = 'feat/cnn_sent_train.pkl'
-    path_feats['sent_dev'] = 'feat/cnn_sent_dev.pkl'
+    path_feats['sent_train'] = 'feat/sent_train.pkl'
+    path_feats['sent_dev'] = 'feat/sent_dev.pkl'
     path_feats['label_train'] = 'feat/label_train.pkl'
     path_feats['label_dev'] = 'feat/label_dev.pkl'
-    fit('cnn', 50, embed_mat, class_num, path_feats, detail)
-    path_feats['sent_train'] = 'feat/rnn_sent_train.pkl'
-    path_feats['sent_dev'] = 'feat/rnn_sent_dev.pkl'
-    fit('rnn', 50, embed_mat, class_num, path_feats, detail)
+    fit('trm', 50, embed_mat, class_num, path_feats, detail)
