@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from represent import sent2ind, add_buf
+from represent import sent2ind
 
 from util import map_item
 
@@ -30,18 +30,14 @@ with open(path_label_ind, 'rb') as f:
 
 ind_labels = ind2label(label_inds)
 
-paths = {'cnn': 'model/cnn.pkl',
-         'rnn': 'model/rnn.pkl'}
+paths = {'trm': 'model/dnn_trm.pkl'}
 
-models = {'cnn': torch.load(map_item('cnn', paths), map_location=device),
-          'rnn': torch.load(map_item('rnn', paths), map_location=device)}
+models = {'trm': torch.load(map_item('trm', paths), map_location=device)}
 
 
 def predict(text, name):
     text = text.strip()
     pad_seq = sent2ind(text, word_inds, seq_len, keep_oov=True)
-    if name == 'cnn':
-        pad_seq = add_buf([pad_seq])[0]
     sent = torch.LongTensor([pad_seq]).to(device)
     model = map_item(name, models)
     with torch.no_grad():
@@ -49,7 +45,8 @@ def predict(text, name):
         probs = F.softmax(model(sent), dim=-1)
     probs = probs.numpy()[0]
     inds = np.argmax(probs, axis=1)
-    preds = [ind_labels[ind] for ind in inds[-len(text):]]
+    bound = min(len(text), seq_len)
+    preds = [ind_labels[ind] for ind in inds[:bound]]
     pairs = list()
     for word, pred in zip(text, preds):
         pairs.append((word, pred))
@@ -59,5 +56,4 @@ def predict(text, name):
 if __name__ == '__main__':
     while True:
         text = input('text: ')
-        print('cnn: %s' % predict(text, 'cnn'))
-        print('rnn: %s' % predict(text, 'rnn'))
+        print('trm: %s' % predict(text, 'trm'))
