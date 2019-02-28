@@ -1,4 +1,4 @@
-## Chinese Entity Recognize 2019-3
+## Chinese Entity Recognize 2019-2
 
 #### 1.preprocess
 
