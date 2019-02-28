@@ -44,5 +44,4 @@ def test(name, sents):
 
 
 if __name__ == '__main__':
-    test('cnn', sents)
-    test('rnn', sents)
+    test('trm', sents)
