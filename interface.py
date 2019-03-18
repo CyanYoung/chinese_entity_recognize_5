@@ -59,5 +59,4 @@ def response(text, name):
 if __name__ == '__main__':
     while True:
         text = input('text: ')
-        print(response(text, 'cnn'))
-        print(response(text, 'rnn'))
+        print(response(text, 'trm'))
