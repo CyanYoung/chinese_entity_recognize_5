@@ -36,7 +36,6 @@ models = {'trm': torch.load(map_item('trm', paths), map_location=device)}
 
 
 def predict(text, name):
-    text = text.strip()
     pad_seq = sent2ind(text, word_inds, seq_len, keep_oov=True)
     sent = torch.LongTensor([pad_seq]).to(device)
     model = map_item(name, models)
