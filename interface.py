@@ -1,6 +1,6 @@
 import json
 
-from recognize import predict
+from recognize import ind_labels, predict
 
 from util import load_pair, get_logger
 
@@ -26,10 +26,11 @@ def make_dict(entitys, labels):
     return slot_dict
 
 
-def merge(pairs):
+def merge(text, preds):
     entitys, labels = list(), list()
     entity, label = [''] * 2
-    for word, pred in pairs:
+    for word, pred in zip(text, preds):
+        pred = ind_labels[pred]
         if pred[:2] == 'B-':
             if entity:
                 insert(entity, label, entitys, labels)
@@ -47,8 +48,8 @@ def merge(pairs):
 
 def response(text, name):
     data = dict()
-    pairs = predict(text, name)
-    slot_dict = merge(pairs)
+    preds = predict(text, name)
+    slot_dict = merge(text, preds)
     data['content'] = text
     data['slot'] = slot_dict
     data_str = json.dumps(data, ensure_ascii=False)

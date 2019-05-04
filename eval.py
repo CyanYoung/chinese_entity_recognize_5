@@ -1,46 +1,49 @@
 import json
 import pickle as pk
 
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-from recognize import predict
+from recognize import ind_labels, predict
+
+from util import map_item
 
 
 seq_len = 50
 
 path_sent = 'data/test.json'
-path_label_ind = 'feat/label_ind.pkl'
 with open(path_sent, 'r') as f:
     sents = json.load(f)
+
+path_label_ind = 'feat/label_ind.pkl'
 with open(path_label_ind, 'rb') as f:
     label_inds = pk.load(f)
 
-slots = list(label_inds.keys())
-slots.remove('N')
-slots.remove('O')
+class_num = len(label_inds)
 
+slots = list(ind_labels.keys())
+slots.remove(label_inds['N'])
+slots.remove(label_inds['O'])
 
-def flat(labels):
-    flat_labels = list()
-    for label in labels:
-        flat_labels.extend(label)
-    return flat_labels
+paths = {'trm': 'metric/trm.csv'}
 
 
 def test(name, sents):
-    label_mat, pred_mat = list(), list()
+    flat_labels, flat_preds = [0], [0]
     for text, quaples in sents.items():
         labels = list()
         for quaple in quaples:
-            labels.append(quaple['label'])
+            labels.append(label_inds[quaple['label']])
         bound = seq_len if len(text) > seq_len else len(text)
-        label_mat.append(labels[:bound])
-        pairs = predict(text, name)
-        preds = [pred for word, pred in pairs]
-        pred_mat.append(preds)
-    labels, preds = flat(label_mat), flat(pred_mat)
-    f1 = f1_score(labels, preds, average='weighted', labels=slots)
-    print('\n%s f1: %.2f - acc: %.2f' % (name, f1, accuracy_score(labels, preds)))
+        flat_labels.extend(labels[:bound])
+        flat_preds.extend(predict(text, name))
+    precs = precision_score(flat_labels, flat_preds, average=None)
+    recs = recall_score(flat_labels, flat_preds, average=None)
+    with open(map_item(name, paths), 'w') as f:
+        f.write('label,prec,rec' + '\n')
+        for i in range(1, class_num):
+            f.write('%s,%.2f,%.2f\n' % (ind_labels[i], precs[i], recs[i]))
+    f1 = f1_score(flat_labels, flat_preds, average='weighted', labels=slots)
+    print('\n%s f1: %.2f - acc: %.2f' % (name, f1, accuracy_score(flat_labels, flat_preds)))
 
 
 if __name__ == '__main__':
