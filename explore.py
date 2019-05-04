@@ -41,10 +41,10 @@ def statistic(path_train):
         sents = json.load(f)
     texts = sents.keys()
     slots = list()
-    for quaples in sents.values():
-        for quaple in quaples:
-            if quaple['label'] != 'O':
-                slots.append(quaple['label'])
+    for pairs in sents.values():
+        for pair in pairs:
+            if pair['label'] != 'O':
+                slots.append(pair['label'])
     text_str = ''.join(texts)
     text_lens = [len(text) for text in texts]
     count(path_vocab_freq, text_str, 'vocab')
