@@ -1,9 +1,8 @@
 import json
-import pickle as pk
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-from recognize import ind_labels, predict
+from recognize import label_inds, ind_labels, predict
 
 from util import map_item
 
@@ -13,10 +12,6 @@ seq_len = 50
 path_sent = 'data/test.json'
 with open(path_sent, 'r') as f:
     sents = json.load(f)
-
-path_label_ind = 'feat/label_ind.pkl'
-with open(path_label_ind, 'rb') as f:
-    label_inds = pk.load(f)
 
 class_num = len(label_inds)
 
