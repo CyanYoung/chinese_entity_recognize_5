@@ -27,13 +27,6 @@ def load_poly(path):
     return vocab
 
 
-def sent2label(pairs):
-    label = list()
-    for pair in pairs:
-        label.append(pair['label'])
-    return label
-
-
 def map_item(name, items):
     if name in items:
         return items[name]

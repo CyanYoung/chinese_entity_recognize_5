@@ -5,8 +5,6 @@ import numpy as np
 
 from gensim.corpora import Dictionary
 
-from util import sent2label
-
 
 embed_len = 200
 min_freq = 1
@@ -68,7 +66,8 @@ def pad(seq, seq_len):
 def label2ind(sents, path_label_ind):
     labels = list()
     for pairs in sents.values():
-        labels.extend(sent2label(pairs))
+        for pair in pairs:
+            labels.append(pair['label'])
     labels = sorted(list(set(labels)))
     label_inds = dict()
     label_inds['N'] = 0
