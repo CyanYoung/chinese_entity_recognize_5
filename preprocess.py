@@ -88,12 +88,6 @@ def generate(temps, slots, num):
     return word_mat, label_mat
 
 
-def sync_shuffle(list1, list2):
-    pairs = list(zip(list1, list2))
-    shuffle(pairs)
-    return zip(*pairs)
-
-
 def label_sent(path):
     sents = dict()
     for text, entity_str, label_str in pd.read_csv(path).values:
@@ -146,7 +140,9 @@ def expand(sents, gen_word_mat, gen_label_mat):
     word_mat, label_mat = dict2list(sents)
     word_mat.extend(gen_word_mat)
     label_mat.extend(gen_label_mat)
-    word_mat, label_mat = sync_shuffle(word_mat, label_mat)
+    pairs = list(zip(word_mat, label_mat))
+    shuffle(pairs)
+    word_mat, label_mat = zip(*pairs)
     bound1 = int(len(word_mat) * 0.7)
     bound2 = int(len(word_mat) * 0.9)
     train_sents = list2dict(word_mat[:bound1], label_mat[:bound1])
